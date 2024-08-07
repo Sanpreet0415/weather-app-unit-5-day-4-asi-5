@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://www.unpkg.com/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://www.unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/babel">
+      // Your React code will go here
+      // In the <script type="text/babel"> section
+
+const { useState } = React;
+const axios = window.axios;
+
+const App = () => {
+  const [city, setCity] = useState('');
+  const [weather, setWeather] = useState(null);
+  const [favourites, setFavourites] = useState([]);
+
+  const fetchWeather = async () => {
+    const apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeather API key
+    try {
+      const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
+      setWeather(response.data);
+    } catch (error) {
+      console.error('Error fetching weather data', error);
+    }
+  };
+
+  const addToFavourites = () => {
+    setFavourites([...favourites, city]);
+    setCity('');
+  };
+
+  return (
+    <div>
+      <Search city={city} setCity={setCity} fetchWeather={fetchWeather} />
+      {weather && <WeatherDisplay weather={weather} />}
+      <Favourites favourites={favourites} />
+      <button onClick={addToFavourites}>Add to Favourites</button>
+    </div>
+  );
+};
+
+const Search = ({ city, setCity, fetchWeather }) => (
+  <div>
+    <input
+      type="text"
+      value={city}
+      onChange={(e) => setCity(e.target.value)}
+      placeholder="Enter city"
+    />
+    <button onClick={fetchWeather}>Search</button>
+  </div>
+);
+
+const WeatherDisplay = ({ weather }) => (
+  <div>
+    <h2>{weather.name}</h2>
+    <p>Temperature: {weather.main.temp}°C</p>
+    <p>Weather: {weather.weather[0].description}</p>
+    {/* Add more details as needed */}
+  </div>
+);
+
+const Favourites = ({ favourites }) => (
+  <div>
+    <h2>Favourites</h2>
+    <ul>
+      {favourites.map((fav, index) => (
+        <li key={index}>{fav}</li>
+      ))}
+    </ul>
+  </div>
+);
+
+ReactDOM.render(<App />, document.getElementById('root'));
+
+    </script>
+  </body>
+</html>
